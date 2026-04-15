@@ -73,9 +73,10 @@ function formatDate(date: Date): string {
 interface ContactListItemProps {
   contact: ContactMock;
   onClick?: () => void;
+  isSelected?: boolean;
 }
 
-export function ContactListItem({ contact, onClick }: ContactListItemProps) {
+export function ContactListItem({ contact, onClick, isSelected }: ContactListItemProps) {
   const isUnread = contact.status === "UNREAD";
 
   return (
@@ -83,7 +84,8 @@ export function ContactListItem({ contact, onClick }: ContactListItemProps) {
       onClick={onClick}
       className={cn(
         "flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors hover:bg-muted/50",
-        isUnread && "bg-muted/30"
+        isUnread && "bg-muted/30",
+        isSelected && "bg-muted"
       )}
     >
       {isUnread && (

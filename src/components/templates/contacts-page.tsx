@@ -3,9 +3,12 @@
 import { useState } from "react";
 import { mockContacts, ContactStatus, ContactMock } from "@/mocks/contacts";
 import { ContactListItem } from "./contact-list-item";
+import { ContactDetail } from "@/components/templates/contact-detail";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { createMetadata } from "@/lib/metadata";
+import { Inbox, Archive, Trash2, Clock } from "lucide-react";
 
 export const metadata = createMetadata({ title: "Demandes de contact" });
 
@@ -35,9 +38,18 @@ function getArchivedCount(): number {
 
 export default function ContactsPage() {
   const [activeTab, setActiveTab] = useState<TabType>("inbox");
+  const [selectedContact, setSelectedContact] = useState<ContactMock | null>(null);
+  const [contacts, setContacts] = useState(mockContacts);
 
   const currentTab = tabs.find((t) => t.id === activeTab)!;
-  const contacts = getContactsByStatus(currentTab.status);
+  const filteredContacts = getContactsByStatus(currentTab.status);
+
+  const handleStatusChange = (contactId: string, newStatus: ContactStatus) => {
+    setContacts((prev) =>
+      prev.map((c) => (c.id === contactId ? { ...c, status: newStatus } : c))
+    );
+    setSelectedContact(null);
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -50,7 +62,10 @@ export default function ContactsPage() {
 
       <div className="flex gap-1 border-b">
         <button
-          onClick={() => setActiveTab("inbox")}
+          onClick={() => {
+            setActiveTab("inbox");
+            setSelectedContact(null);
+          }}
           className={cn(
             "px-4 py-2 text-sm font-medium transition-colors relative",
             activeTab === "inbox"
@@ -68,7 +83,10 @@ export default function ContactsPage() {
         </button>
 
         <button
-          onClick={() => setActiveTab("awaiting")}
+          onClick={() => {
+            setActiveTab("awaiting");
+            setSelectedContact(null);
+          }}
           className={cn(
             "px-4 py-2 text-sm font-medium transition-colors relative",
             activeTab === "awaiting"
@@ -86,7 +104,10 @@ export default function ContactsPage() {
         </button>
 
         <button
-          onClick={() => setActiveTab("archived")}
+          onClick={() => {
+            setActiveTab("archived");
+            setSelectedContact(null);
+          }}
           className={cn(
             "px-4 py-2 text-sm font-medium transition-colors relative",
             activeTab === "archived"
@@ -104,32 +125,45 @@ export default function ContactsPage() {
         </button>
       </div>
 
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">
-            {currentTab.label}
-            <span className="ml-2 text-muted-foreground font-normal">
-              ({contacts.length})
-            </span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          {contacts.length === 0 ? (
-            <div className="p-6 text-center text-muted-foreground text-sm">
-              Aucun message dans cette catégorie.
-            </div>
-          ) : (
-            <div className="divide-y">
-              {contacts.map((contact) => (
-                <ContactListItem
-                  key={contact.id}
-                  contact={contact}
-                />
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {selectedContact ? (
+        <Card className="flex-1">
+          <CardContent className="p-0 h-full">
+            <ContactDetail
+              contact={selectedContact}
+              onStatusChange={handleStatusChange}
+              onBack={() => setSelectedContact(null)}
+            />
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">
+              {currentTab.label}
+              <span className="ml-2 text-muted-foreground font-normal">
+                ({filteredContacts.length})
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            {filteredContacts.length === 0 ? (
+              <div className="p-6 text-center text-muted-foreground text-sm">
+                Aucun message dans cette catégorie.
+              </div>
+            ) : (
+              <div className="divide-y">
+                {filteredContacts.map((contact) => (
+                  <ContactListItem
+                    key={contact.id}
+                    contact={contact}
+                    onClick={() => setSelectedContact(contact)}
+                  />
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
