@@ -14,6 +14,7 @@ export async function getContacts(): Promise<{
     replyAt: Date | null;
     status: ContactStatus;
     createdAt: Date;
+    updatedAt: Date;
   }[];
 }> {
   const contacts = await prisma.contact.findMany({

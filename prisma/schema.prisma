@@ -18,6 +18,7 @@ model User {
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
+  blogPosts    BlogPost[]
 
   role String
 
@@ -157,11 +158,42 @@ model Settings {
   updatedAt DateTime @updatedAt
 }
 
+// Blog
+model BlogPost {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title      String
+  excerpt    String?   @db.Text
+  content    String    @db.Text
+  coverImage String?
+  category   String
+  tags       String[]
+  published Boolean   @default(false)
+  featured   Boolean   @default(false)
+  views      Int       @default(0)
+  authorId   String
+  author     User      @relation(fields: [authorId], references: [id])
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([category])
+  @@index([published])
+  @@map("blog_post")
+}
+
 // Enums
 enum ProjectStatus {
   IN_PROGRESS
   COMPLETED
   FEATURED
+}
+
+enum BlogCategory {
+  ENTREPRISE
+  TECHNOLOGIE
+  PROJETS
+  CARRIERES
+  EVENEMENTS
 }
 
 enum TechCategory {

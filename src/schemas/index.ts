@@ -79,3 +79,20 @@ export const testimonialSchema = z.object({
   projectId: z.string().optional().or(z.literal("")),
   active: z.boolean().default(true),
 });
+
+export const blogSchema = z.object({
+  title: z.string().min(2, "Le titre doit contenir au moins 2 caractères").max(150, "Le titre ne doit pas dépasser 150 caractères"),
+  slug: z.string().max(100, "Le slug ne doit pas dépasser 100 caractères").optional(),
+  excerpt: z.string().max(300, "Le résumé ne doit pas dépasser 300 caractères").optional(),
+  content: z.string().min(20, "Le contenu doit contenir au moins 20 caractères"),
+  coverImage: z.string().url("URL invalide").optional().or(z.literal("")),
+  category: z.enum(["ENTREPRISE", "TECHNOLOGIE", "PROJETS", "CARRIERES", "EVENEMENTS"]),
+  tags: z.array(z.string()).default([]),
+  published: z.boolean().default(false),
+  featured: z.boolean().default(false),
+  authorId: z.string().min(1, "L'auteur est requis"),
+});
+
+export const blogUpdateSchema = blogSchema.merge(z.object({
+  id: z.string(),
+}));
